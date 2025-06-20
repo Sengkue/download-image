@@ -622,7 +622,7 @@
                 pixabay: 'https://pixabay.com/api/docs/'
             };
             
-            alert(`To use ${apiName.toUpperCase()} API, you need to:
+            alert(`To use the ${apiName.toUpperCase()} API, you need to:
             
 1. Visit: ${urls[apiName]}
 2. Create a free account
@@ -930,7 +930,15 @@ For now, switching back to Unsplash Source (no key required).`);
             showDownloadFeedback();
         }
 
-        // Show download feedback
+        // Hide the setup guide
+        function hideSetupGuide() {
+            document.getElementById('apiSetupGuide').style.display = 'none';
+        }
+
+        // Show the setup guide when needed
+        function showSetupGuide() {
+            document.getElementById('apiSetupGuide').style.display = 'block';
+        }
         function showDownloadFeedback() {
             // Create temporary notification
             const notification = document.createElement('div');

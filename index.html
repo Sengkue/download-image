@@ -374,7 +374,60 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
+    <!-- API Setup Guide (appears when using APIs that need keys) -->
+    <div id="apiSetupGuide" style="
+        background: linear-gradient(45deg, #ff9a56, #ff6b6b);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        display: none;
+        position: relative;
+        z-index: 50;
+    ">
+        <div class="container">
+            <h3 style="margin: 0 0 10px 0;">🔑 Quick Setup Required</h3>
+            <p style="margin: 0 0 15px 0;">To access thousands of high-quality images, get your free API key:</p>
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="https://unsplash.com/developers" target="_blank" style="
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                ">🎨 Unsplash API</a>
+                <a href="https://www.pexels.com/api/" target="_blank" style="
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                ">📸 Pexels API</a>
+                <a href="https://pixabay.com/api/docs/" target="_blank" style="
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    backdrop-filter: blur(10px);
+                ">🖼️ Pixabay API</a>
+            </div>
+            <button onclick="hideSetupGuide()" style="
+                position: absolute;
+                top: 10px;
+                right: 20px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+            ">×</button>
+        </div>
+    </div>
     <header class="header">
         <div class="container">
             <nav class="nav">
@@ -467,82 +520,281 @@
     </footer>
 
     <script>
-        // Sample image data
-        const sampleImages = [
-            {
-                id: 1,
-                url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-                title: 'Mountain Landscape',
-                category: 'nature',
-                tags: ['mountain', 'landscape', 'nature', 'sky']
+        // API Configuration - Add your API keys here
+        const API_CONFIG = {
+            // OPTION 1: Unsplash API (Best quality, requires free API key)
+            unsplash: {
+                accessKey: 'YOUR_UNSPLASH_ACCESS_KEY', // Get free at: https://unsplash.com/developers
+                baseUrl: 'https://api.unsplash.com',
+                perPage: 30
             },
-            {
-                id: 2,
-                url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop',
-                title: 'Business Meeting',
-                category: 'business',
-                tags: ['business', 'meeting', 'office', 'team']
+            
+            // OPTION 2: Pexels API (Free, no attribution required)
+            pexels: {
+                apiKey: 'YOUR_PEXELS_API_KEY', // Get free at: https://www.pexels.com/api/
+                baseUrl: 'https://api.pexels.com/v1',
+                perPage: 30
             },
-            {
-                id: 3,
-                url: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop',
-                title: 'Technology Circuit',
-                category: 'technology',
-                tags: ['technology', 'circuit', 'electronic', 'digital']
+            
+            // OPTION 3: Pixabay API (Free with registration)
+            pixabay: {
+                apiKey: 'YOUR_PIXABAY_API_KEY', // Get free at: https://pixabay.com/api/docs/
+                baseUrl: 'https://pixabay.com/api',
+                perPage: 30
             },
-            {
-                id: 4,
-                url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-                title: 'Abstract Colors',
-                category: 'abstract',
-                tags: ['abstract', 'colors', 'art', 'design']
-            },
-            {
-                id: 5,
-                url: 'https://images.unsplash.com/photo-1448630360428-65456885c650?w=400&h=300&fit=crop',
-                title: 'Modern Architecture',
-                category: 'architecture',
-                tags: ['architecture', 'building', 'modern', 'design']
-            },
-            {
-                id: 6,
-                url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
-                title: 'Forest Path',
-                category: 'nature',
-                tags: ['forest', 'path', 'trees', 'peaceful']
-            },
-            {
-                id: 7,
-                url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
-                title: 'Business Analytics',
-                category: 'business',
-                tags: ['business', 'analytics', 'data', 'charts']
-            },
-            {
-                id: 8,
-                url: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop',
-                title: 'Tech Workspace',
-                category: 'technology',
-                tags: ['technology', 'workspace', 'coding', 'computer']
-            },
-            {
-                id: 9,
-                url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-                title: 'Geometric Pattern',
-                category: 'abstract',
-                tags: ['abstract', 'geometric', 'pattern', 'minimal']
+            
+            // OPTION 4: Unsplash Source (No API key needed, but limited features)
+            unsplashSource: {
+                baseUrl: 'https://source.unsplash.com',
+                // This doesn't require API key but has limited functionality
             }
-        ];
+        };
 
-        let currentImages = [...sampleImages];
+        // Current active API
+        let currentAPI = 'unsplashSource'; // Change this to switch APIs
+
+        // Store fetched images
+        let currentImages = [];
         let currentCategory = 'all';
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
-            displayImages(currentImages);
+            loadFeaturedImages();
+            
+            // Add API selector in the header
+            addAPISelector();
         });
 
-        // Display images in the grid
+        // Add API selector to switch between different APIs
+        function addAPISelector() {
+            const nav = document.querySelector('.nav-links');
+            const apiSelector = document.createElement('li');
+            apiSelector.innerHTML = `
+                <select id="apiSelector" onchange="switchAPI(this.value)" style="
+                    background: linear-gradient(45deg, #667eea, #764ba2);
+                    color: white;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 20px;
+                    font-weight: 500;
+                    cursor: pointer;
+                ">
+                    <option value="unsplashSource">Unsplash Source (No Key)</option>
+                    <option value="unsplash">Unsplash API (Get Key)</option>
+                    <option value="pexels">Pexels API (Get Key)</option>
+                    <option value="pixabay">Pixabay API (Get Key)</option>
+                </select>
+            `;
+            nav.appendChild(apiSelector);
+        }
+
+        // Switch between different APIs
+        function switchAPI(apiName) {
+            currentAPI = apiName;
+            
+            if (apiName !== 'unsplashSource' && !hasValidAPIKey(apiName)) {
+                showAPIKeyModal(apiName);
+                return;
+            }
+            
+            loadFeaturedImages();
+        }
+
+        // Check if API key is configured
+        function hasValidAPIKey(apiName) {
+            switch(apiName) {
+                case 'unsplash':
+                    return API_CONFIG.unsplash.accessKey !== 'YOUR_UNSPLASH_ACCESS_KEY';
+                case 'pexels':
+                    return API_CONFIG.pexels.apiKey !== 'YOUR_PEXELS_API_KEY';
+                case 'pixabay':
+                    return API_CONFIG.pixabay.apiKey !== 'YOUR_PIXABAY_API_KEY';
+                default:
+                    return true;
+            }
+        }
+
+        // Show modal for API key setup
+        function showAPIKeyModal(apiName) {
+            const urls = {
+                unsplash: 'https://unsplash.com/developers',
+                pexels: 'https://www.pexels.com/api/',
+                pixabay: 'https://pixabay.com/api/docs/'
+            };
+            
+            alert(`To use ${apiName.toUpperCase()} API, you need to:
+            
+1. Visit: ${urls[apiName]}
+2. Create a free account
+3. Get your API key
+4. Replace the API key in the code
+
+For now, switching back to Unsplash Source (no key required).`);
+            
+            document.getElementById('apiSelector').value = 'unsplashSource';
+            currentAPI = 'unsplashSource';
+        }
+
+        // Load featured images based on current API
+        async function loadFeaturedImages() {
+            showLoading();
+            
+            try {
+                const images = await fetchImages('featured');
+                currentImages = images;
+                hideLoading();
+                displayImages(images);
+            } catch (error) {
+                console.error('Error loading images:', error);
+                hideLoading();
+                showErrorMessage('Failed to load images. Please try again.');
+            }
+        }
+
+        // Fetch images from selected API
+        async function fetchImages(query = '', category = '') {
+            switch(currentAPI) {
+                case 'unsplash':
+                    return await fetchUnsplashImages(query, category);
+                case 'pexels':
+                    return await fetchPexelsImages(query, category);
+                case 'pixabay':
+                    return await fetchPixabayImages(query, category);
+                case 'unsplashSource':
+                default:
+                    return await fetchUnsplashSourceImages(query, category);
+            }
+        }
+
+        // Fetch from Unsplash API (requires API key)
+        async function fetchUnsplashImages(query, category) {
+            const searchQuery = query || category || 'featured';
+            const url = `${API_CONFIG.unsplash.baseUrl}/search/photos?query=${searchQuery}&per_page=${API_CONFIG.unsplash.perPage}&orientation=landscape`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Client-ID ${API_CONFIG.unsplash.accessKey}`
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch from Unsplash API');
+            
+            const data = await response.json();
+            
+            return data.results.map(photo => ({
+                id: photo.id,
+                url: photo.urls.regular,
+                downloadUrl: photo.urls.full,
+                title: photo.alt_description || photo.description || 'Untitled',
+                author: photo.user.name,
+                authorUrl: photo.user.links.html,
+                category: categorizeImage(photo.tags),
+                tags: photo.tags ? photo.tags.map(tag => tag.title).slice(0, 4) : [],
+                source: 'Unsplash'
+            }));
+        }
+
+        // Fetch from Pexels API (requires API key)
+        async function fetchPexelsImages(query, category) {
+            const searchQuery = query || category || 'nature';
+            const url = `${API_CONFIG.pexels.baseUrl}/search?query=${searchQuery}&per_page=${API_CONFIG.pexels.perPage}&orientation=landscape`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': API_CONFIG.pexels.apiKey
+                }
+            });
+            
+            if (!response.ok) throw new Error('Failed to fetch from Pexels API');
+            
+            const data = await response.json();
+            
+            return data.photos.map(photo => ({
+                id: photo.id,
+                url: photo.src.large,
+                downloadUrl: photo.src.original,
+                title: photo.alt || 'Beautiful Image',
+                author: photo.photographer,
+                authorUrl: photo.photographer_url,
+                category: categorizeImage([{title: query || category}]),
+                tags: [query || category, 'high-quality', 'free'].filter(Boolean),
+                source: 'Pexels'
+            }));
+        }
+
+        // Fetch from Pixabay API (requires API key)
+        async function fetchPixabayImages(query, category) {
+            const searchQuery = query || category || 'nature';
+            const url = `${API_CONFIG.pixabay.baseUrl}/?key=${API_CONFIG.pixabay.apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&per_page=${API_CONFIG.pixabay.perPage}&safesearch=true`;
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error('Failed to fetch from Pixabay API');
+            
+            const data = await response.json();
+            
+            return data.hits.map(photo => ({
+                id: photo.id,
+                url: photo.webformatURL,
+                downloadUrl: photo.largeImageURL,
+                title: photo.tags.split(', ').slice(0, 3).join(' '),
+                author: photo.user,
+                authorUrl: `https://pixabay.com/users/${photo.user}-${photo.user_id}/`,
+                category: categorizeImage([{title: query || category}]),
+                tags: photo.tags.split(', ').slice(0, 4),
+                source: 'Pixabay'
+            }));
+        }
+
+        // Fetch from Unsplash Source (no API key required, but limited)
+        async function fetchUnsplashSourceImages(query, category) {
+            const searches = [
+                query || category || 'nature',
+                'technology',
+                'business',
+                'abstract',
+                'architecture',
+                'landscape',
+                'city',
+                'minimal'
+            ];
+            
+            const images = [];
+            
+            for (let i = 0; i < 12; i++) {
+                const searchTerm = searches[i % searches.length];
+                const randomId = Math.floor(Math.random() * 1000);
+                
+                images.push({
+                    id: `unsplash-${i}-${randomId}`,
+                    url: `${API_CONFIG.unsplashSource.baseUrl}/800x600/?${searchTerm}&${randomId}`,
+                    downloadUrl: `${API_CONFIG.unsplashSource.baseUrl}/1920x1080/?${searchTerm}&${randomId}`,
+                    title: `${searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1)} Photo`,
+                    author: 'Unsplash Contributor',
+                    authorUrl: 'https://unsplash.com',
+                    category: searchTerm,
+                    tags: [searchTerm, 'high-resolution', 'free'],
+                    source: 'Unsplash Source'
+                });
+            }
+            
+            return images;
+        }
+
+        // Helper function to categorize images
+        function categorizeImage(tags) {
+            if (!tags || !tags.length) return 'general';
+            
+            const tagTitles = tags.map(tag => (tag.title || tag).toLowerCase());
+            
+            if (tagTitles.some(tag => ['nature', 'landscape', 'forest', 'mountain', 'ocean'].includes(tag))) return 'nature';
+            if (tagTitles.some(tag => ['business', 'office', 'meeting', 'corporate'].includes(tag))) return 'business';
+            if (tagTitles.some(tag => ['technology', 'computer', 'digital', 'tech'].includes(tag))) return 'technology';
+            if (tagTitles.some(tag => ['abstract', 'art', 'pattern', 'design'].includes(tag))) return 'abstract';
+            if (tagTitles.some(tag => ['architecture', 'building', 'city', 'urban'].includes(tag))) return 'architecture';
+            
+            return 'general';
+        }
         function displayImages(images) {
             const grid = document.getElementById('imageGrid');
             grid.innerHTML = '';
@@ -559,19 +811,23 @@
             card.className = 'image-card';
             card.innerHTML = `
                 <div class="image-container">
-                    <img src="${image.url}" alt="${image.title}" loading="lazy">
+                    <img src="${image.url}" alt="${image.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Available'">
                     <div class="image-overlay">
-                        <button class="download-btn" onclick="downloadImage('${image.url}', '${image.title}')">
+                        <button class="download-btn" onclick="downloadImage('${image.downloadUrl || image.url}', '${image.title}')">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 16l-6-6h4V4h4v6h4l-6 6z"/>
                                 <path d="M20 18H4v-2h16v2z"/>
                             </svg>
-                            Download
+                            Download HD
                         </button>
                     </div>
                 </div>
                 <div class="image-info">
                     <div class="image-title">${image.title}</div>
+                    <div style="font-size: 0.9rem; color: #666; margin: 5px 0;">
+                        by <a href="${image.authorUrl}" target="_blank" style="color: #667eea; text-decoration: none;">${image.author}</a>
+                        <span style="float: right; font-size: 0.8rem; background: #f0f0f0; padding: 2px 8px; border-radius: 10px;">${image.source}</span>
+                    </div>
                     <div class="image-tags">
                         ${image.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
@@ -581,7 +837,7 @@
         }
 
         // Filter by category
-        function filterCategory(category) {
+        async function filterCategory(category) {
             currentCategory = category;
             
             // Update active category
@@ -590,38 +846,49 @@
             });
             event.target.classList.add('active');
 
-            // Filter images
-            const filteredImages = category === 'all' 
-                ? sampleImages 
-                : sampleImages.filter(img => img.category === category);
-            
             showLoading();
-            setTimeout(() => {
+            
+            try {
+                // Fetch new images for the category
+                const filteredImages = category === 'all' 
+                    ? await fetchImages('featured')
+                    : await fetchImages('', category);
+                
+                currentImages = filteredImages;
                 hideLoading();
                 displayImages(filteredImages);
-            }, 500);
+            } catch (error) {
+                console.error('Error filtering images:', error);
+                hideLoading();
+                showErrorMessage('Failed to load category images.');
+            }
         }
 
         // Search functionality
-        function searchImages() {
-            const query = document.querySelector('.search-input').value.toLowerCase();
+        async function searchImages() {
+            const query = document.querySelector('.search-input').value.toLowerCase().trim();
             
-            if (!query.trim()) {
-                displayImages(currentCategory === 'all' ? sampleImages : sampleImages.filter(img => img.category === currentCategory));
+            if (!query) {
+                loadFeaturedImages();
                 return;
             }
 
-            const filteredImages = sampleImages.filter(image => 
-                image.title.toLowerCase().includes(query) ||
-                image.tags.some(tag => tag.toLowerCase().includes(query)) ||
-                image.category.toLowerCase().includes(query)
-            );
-
             showLoading();
-            setTimeout(() => {
+            
+            try {
+                const searchResults = await fetchImages(query);
+                currentImages = searchResults;
                 hideLoading();
-                displayImages(filteredImages);
-            }, 800);
+                displayImages(searchResults);
+                
+                if (searchResults.length === 0) {
+                    showErrorMessage('No images found for your search. Try different keywords.');
+                }
+            } catch (error) {
+                console.error('Error searching images:', error);
+                hideLoading();
+                showErrorMessage('Search failed. Please try again.');
+            }
         }
 
         // Download image functionality
@@ -639,7 +906,27 @@
             link.click();
             document.body.removeChild(link);
 
-            // Show download feedback
+            // Show error message
+        function showErrorMessage(message) {
+            const grid = document.getElementById('imageGrid');
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <div style="font-size: 3rem; color: #ddd; margin-bottom: 20px;">📷</div>
+                    <h3 style="color: #666; margin-bottom: 10px;">Oops!</h3>
+                    <p style="color: #999;">${message}</p>
+                    <button onclick="loadFeaturedImages()" style="
+                        margin-top: 20px;
+                        background: linear-gradient(45deg, #667eea, #764ba2);
+                        color: white;
+                        border: none;
+                        padding: 12px 24px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-weight: 600;
+                    ">Try Again</button>
+                </div>
+            `;
+        }
             showDownloadFeedback();
         }
 

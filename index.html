@@ -520,38 +520,14 @@
     </footer>
 
     <script>
-        // API Configuration - Add your API keys here
+        // API Configuration - Unsplash Only
         const API_CONFIG = {
-            // OPTION 1: Unsplash API (Best quality, requires free API key)
             unsplash: {
-                accessKey: 'TOanRs3TSWEwKta98OG2pg6DHDTldRpFmJAeJm079C8', // Your Unsplash API key
+                accessKey: 'TOanRs3TSWEwKta98OG2pg6DHDTldRpFmJAeJm079C8',
                 baseUrl: 'https://api.unsplash.com',
                 perPage: 30
-            },
-            
-            // OPTION 2: Pexels API (Free, no attribution required)
-            pexels: {
-                apiKey: 'YOUR_PEXELS_API_KEY', // Get free at: https://www.pexels.com/api/
-                baseUrl: 'https://api.pexels.com/v1',
-                perPage: 30
-            },
-            
-            // OPTION 3: Pixabay API (Free with registration)
-            pixabay: {
-                apiKey: 'YOUR_PIXABAY_API_KEY', // Get free at: https://pixabay.com/api/docs/
-                baseUrl: 'https://pixabay.com/api',
-                perPage: 30
-            },
-            
-            // OPTION 4: Unsplash Source (No API key needed, but limited features)
-            unsplashSource: {
-                baseUrl: 'https://source.unsplash.com',
-                // This doesn't require API key but has limited functionality
             }
         };
-
-        // Current active API
-        let currentAPI = 'unsplashSource'; // Change this to switch APIs
 
         // Store fetched images
         let currentImages = [];
@@ -560,87 +536,14 @@
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             loadFeaturedImages();
-            
-            // Add API selector in the header
-            addAPISelector();
         });
 
-        // Add API selector to switch between different APIs
-        function addAPISelector() {
-            const nav = document.querySelector('.nav-links');
-            const apiSelector = document.createElement('li');
-            apiSelector.innerHTML = `
-                <select id="apiSelector" onchange="switchAPI(this.value)" style="
-                    background: linear-gradient(45deg, #667eea, #764ba2);
-                    color: white;
-                    border: none;
-                    padding: 8px 15px;
-                    border-radius: 20px;
-                    font-weight: 500;
-                    cursor: pointer;
-                ">
-                    <option value="unsplashSource">Unsplash Source (No Key)</option>
-                    <option value="unsplash">Unsplash API (Get Key)</option>
-                    <option value="pexels">Pexels API (Get Key)</option>
-                    <option value="pixabay">Pixabay API (Get Key)</option>
-                </select>
-            `;
-            nav.appendChild(apiSelector);
-        }
-
-        // Switch between different APIs
-        function switchAPI(apiName) {
-            currentAPI = apiName;
-            
-            if (apiName !== 'unsplashSource' && !hasValidAPIKey(apiName)) {
-                showAPIKeyModal(apiName);
-                return;
-            }
-            
-            loadFeaturedImages();
-        }
-
-        // Check if API key is configured
-        function hasValidAPIKey(apiName) {
-            switch(apiName) {
-                case 'unsplash':
-                    return API_CONFIG.unsplash.accessKey !== 'YOUR_UNSPLASH_ACCESS_KEY';
-                case 'pexels':
-                    return API_CONFIG.pexels.apiKey !== 'YOUR_PEXELS_API_KEY';
-                case 'pixabay':
-                    return API_CONFIG.pixabay.apiKey !== 'YOUR_PIXABAY_API_KEY';
-                default:
-                    return true;
-            }
-        }
-
-        // Show modal for API key setup
-        function showAPIKeyModal(apiName) {
-            const urls = {
-                unsplash: 'https://unsplash.com/developers',
-                pexels: 'https://www.pexels.com/api/',
-                pixabay: 'https://pixabay.com/api/docs/'
-            };
-            
-            alert(`To use the ${apiName.toUpperCase()} API, you need to:
-            
-1. Visit: ${urls[apiName]}
-2. Create a free account
-3. Get your API key
-4. Replace the API key in the code
-
-For now, switching back to Unsplash Source (no key required).`);
-            
-            document.getElementById('apiSelector').value = 'unsplashSource';
-            currentAPI = 'unsplashSource';
-        }
-
-        // Load featured images based on current API
+        // Load featured images from Unsplash
         async function loadFeaturedImages() {
             showLoading();
             
             try {
-                const images = await fetchImages('featured');
+                const images = await fetchUnsplashImages('featured');
                 currentImages = images;
                 hideLoading();
                 displayImages(images);
@@ -651,22 +554,7 @@ For now, switching back to Unsplash Source (no key required).`);
             }
         }
 
-        // Fetch images from selected API
-        async function fetchImages(query = '', category = '') {
-            switch(currentAPI) {
-                case 'unsplash':
-                    return await fetchUnsplashImages(query, category);
-                case 'pexels':
-                    return await fetchPexelsImages(query, category);
-                case 'pixabay':
-                    return await fetchPixabayImages(query, category);
-                case 'unsplashSource':
-                default:
-                    return await fetchUnsplashSourceImages(query, category);
-            }
-        }
-
-        // Fetch from Unsplash API (requires API key)
+        // Fetch images from Unsplash API
         async function fetchUnsplashImages(query, category) {
             const searchQuery = query || category || 'featured';
             const url = `${API_CONFIG.unsplash.baseUrl}/search/photos?query=${searchQuery}&per_page=${API_CONFIG.unsplash.perPage}&orientation=landscape`;
@@ -685,116 +573,13 @@ For now, switching back to Unsplash Source (no key required).`);
                 id: photo.id,
                 url: photo.urls.regular,
                 downloadUrl: photo.urls.full,
-                title: photo.alt_description || photo.description || 'Untitled',
+                title: photo.alt_description || photo.description || 'Beautiful Image',
                 author: photo.user.name,
                 authorUrl: photo.user.links.html,
                 category: categorizeImage(photo.tags),
-                tags: photo.tags ? photo.tags.map(tag => tag.title).slice(0, 4) : [],
+                tags: photo.tags ? photo.tags.map(tag => tag.title).slice(0, 4) : ['photography', 'high-quality'],
                 source: 'Unsplash'
             }));
-        }
-
-        // Fetch from Pexels API (requires API key)
-        async function fetchPexelsImages(query, category) {
-            const searchQuery = query || category || 'nature';
-            const url = `${API_CONFIG.pexels.baseUrl}/search?query=${searchQuery}&per_page=${API_CONFIG.pexels.perPage}&orientation=landscape`;
-            
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': API_CONFIG.pexels.apiKey
-                }
-            });
-            
-            if (!response.ok) throw new Error('Failed to fetch from Pexels API');
-            
-            const data = await response.json();
-            
-            return data.photos.map(photo => ({
-                id: photo.id,
-                url: photo.src.large,
-                downloadUrl: photo.src.original,
-                title: photo.alt || 'Beautiful Image',
-                author: photo.photographer,
-                authorUrl: photo.photographer_url,
-                category: categorizeImage([{title: query || category}]),
-                tags: [query || category, 'high-quality', 'free'].filter(Boolean),
-                source: 'Pexels'
-            }));
-        }
-
-        // Fetch from Pixabay API (requires API key)
-        async function fetchPixabayImages(query, category) {
-            const searchQuery = query || category || 'nature';
-            const url = `${API_CONFIG.pixabay.baseUrl}/?key=${API_CONFIG.pixabay.apiKey}&q=${searchQuery}&image_type=photo&orientation=horizontal&per_page=${API_CONFIG.pixabay.perPage}&safesearch=true`;
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) throw new Error('Failed to fetch from Pixabay API');
-            
-            const data = await response.json();
-            
-            return data.hits.map(photo => ({
-                id: photo.id,
-                url: photo.webformatURL,
-                downloadUrl: photo.largeImageURL,
-                title: photo.tags.split(', ').slice(0, 3).join(' '),
-                author: photo.user,
-                authorUrl: `https://pixabay.com/users/${photo.user}-${photo.user_id}/`,
-                category: categorizeImage([{title: query || category}]),
-                tags: photo.tags.split(', ').slice(0, 4),
-                source: 'Pixabay'
-            }));
-        }
-
-        // Fetch from Unsplash Source (no API key required, but limited)
-        async function fetchUnsplashSourceImages(query, category) {
-            const searches = [
-                query || category || 'nature',
-                'landscape',
-                'city',
-                'technology',
-                'business',
-                'abstract',
-                'architecture',
-                'minimal',
-                'ocean',
-                'mountain',
-                'forest',
-                'office'
-            ];
-            
-            const images = [];
-            
-            for (let i = 0; i < 12; i++) {
-                const searchTerm = searches[i % searches.length];
-                const randomId = Date.now() + Math.floor(Math.random() * 10000) + i;
-                
-                // Use different Unsplash Source endpoints for better reliability
-                const baseUrls = [
-                    'https://source.unsplash.com',
-                    'https://images.unsplash.com'
-                ];
-                
-                const baseUrl = baseUrls[i % baseUrls.length];
-                
-                images.push({
-                    id: `unsplash-${i}-${randomId}`,
-                    url: baseUrl === 'https://source.unsplash.com' 
-                        ? `${baseUrl}/800x600/?${searchTerm}&sig=${randomId}`
-                        : `${baseUrl}/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&auto=format`,
-                    downloadUrl: baseUrl === 'https://source.unsplash.com'
-                        ? `${baseUrl}/1920x1080/?${searchTerm}&sig=${randomId}`
-                        : `${baseUrl}/photo-1506905925346-21bda4d32df4?w=1920&h=1080&fit=crop&auto=format`,
-                    title: `${searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1)} Photo`,
-                    author: 'Unsplash Contributor',
-                    authorUrl: 'https://unsplash.com',
-                    category: searchTerm,
-                    tags: [searchTerm, 'high-resolution', 'free'],
-                    source: 'Unsplash Source'
-                });
-            }
-            
-            return images;
         }
 
         // Helper function to categorize images
@@ -912,8 +697,8 @@ For now, switching back to Unsplash Source (no key required).`);
             try {
                 // Fetch new images for the category
                 const filteredImages = category === 'all' 
-                    ? await fetchImages('featured')
-                    : await fetchImages('', category);
+                    ? await fetchUnsplashImages('featured')
+                    : await fetchUnsplashImages('', category);
                 
                 currentImages = filteredImages;
                 hideLoading();
@@ -937,7 +722,7 @@ For now, switching back to Unsplash Source (no key required).`);
             showLoading();
             
             try {
-                const searchResults = await fetchImages(query);
+                const searchResults = await fetchUnsplashImages(query);
                 currentImages = searchResults;
                 hideLoading();
                 displayImages(searchResults);
